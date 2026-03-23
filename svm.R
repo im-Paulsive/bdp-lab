@@ -1,6 +1,7 @@
 # Load libraries
 library(rpart)
 library(e1071)
+library(rpart.plot)   # added for plotting
 
 # Load dataset
 data <- read.csv("bill_authentication.csv")
@@ -18,6 +19,9 @@ test_data  <- data[-index, ]
 # -------------------- Decision Tree --------------------
 dt_model <- rpart(Class ~ ., data = train_data, method = "class")
 dt_pred <- predict(dt_model, test_data, type = "class")
+
+# ----------- Added Plot -----------
+rpart.plot(dt_model)")
 
 # -------------------- SVM --------------------
 # Scale data

@@ -1,48 +1,82 @@
-# Load dataset from CSV file
-data <- read.csv("raisin.csv")   # Reads the dataset into a dataframe
+# Create dataset
+data <- data.frame(
+  Age = c(22,25,47,52,46,56,48,55,60,62),
+  Salary = c(25000,30000,50000,60000,52000,
+             65000,58000,70000,72000,80000),
+  Purchased = c(0,0,1,1,1,1,1,1,1,1)
+)
 
-# View first few rows of the dataset
-head(data)   # Displays first 6 rows to understand structure
+# Split into train and test
+trainindex <- sample(
+  1:nrow(data),
+  0.8 * nrow(data)
+)
 
-# Convert target variable 'Class' into factor (categorical)
-data$Class <- as.factor(data$Class)   # Required for classification
+train <- data[trainindex, ]
+test <- data[-trainindex, ]
 
-# Split into training and testing data (70-30 split)
-set.seed(123)   # Fixes randomness so results are reproducible
+# Logistic Regression Model
+model <- glm(
+  Purchased ~ Age + Salary,
+  data = train,
+  family = binomial
+)
 
-index <- sample(1:nrow(data), 0.7 * nrow(data))  
-# Randomly selects 70% row indices for training
+# Model summary
+summary(model)
 
-train_data <- data[index, ]   
-# Training dataset (70%)
+# Prediction
+pred <- predict(
+  model,
+  newdata = test,
+  type = "response"
+)
 
-test_data  <- data[-index, ]  
-# Testing dataset (remaining 30%)
+# Convert probability to class
+class <- ifelse(pred > 0.5, 1, 0)
 
-# Fit Logistic Regression Model
-model <- glm(Class ~ ., data = train_data, family = binomial)  
-# Builds model: predict Class using all other variables
+# Output dataframe
+out <- data.frame(
+  Age = test$Age,
+  Salary = test$Salary,
+  Actual = test$Purchased,
+  Predicted = class
+)
 
-# Summary of model
-summary(model)  
-# Shows coefficients, significance, and model details
+print(out)
 
-# Predict probabilities on test data
-prob <- predict(model, test_data, type = "response")  
-# Gives probability of belonging to one class (values between 0 and 1)
+# -----------------------------------
+# Visualization
+# -----------------------------------
 
-# Convert probabilities to class labels (threshold = 0.5)
-predicted_class <- ifelse(prob > 0.5, levels(data$Class)[2], levels(data$Class)[1])  
-# If probability > 0.5 → assign class 2, else class 1
+# Plot training data
+plot(
+  train$Age,
+  train$Salary,
+  col = train$Purchased + 1,
+  pch = 19,
+  main = "Logistic Regression",
+  xlab = "Age",
+  ylab = "Salary"
+)
 
-# Confusion Matrix
-table(Predicted = predicted_class, Actual = test_data$Class)  
-# Compares predicted vs actual classes
+# Add test points
+points(
+  test$Age,
+  test$Salary,
+  col = "black",
+  pch = 8,
+  cex = 2
+)
 
-# Accuracy calculation
-accuracy <- mean(predicted_class == test_data$Class)  
-# Calculates proportion of correct predictions
-
-# Print accuracy
-print(paste("Accuracy:", accuracy))  
-# Displays model accuracy
+# Add legend
+legend(
+  "topleft",
+  legend = c(
+    "Class 0",
+    "Class 1",
+    "Test Data"
+  ),
+  col = c(1,2,"black"),
+  pch = c(19,19,8)
+)

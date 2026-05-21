@@ -1,37 +1,58 @@
-# Load dataset from CSV
-data <- read.csv("data.csv")
+# Sample dataset
+data <- data.frame(
+  x = c(1,2,1.5,8,9,8.5,1,9),
+  y = c(2,1,1.8,8,9,8.2,0.6,11)
+)
 
-# Keep only numeric columns (important for clustering)
-data <- data[sapply(data, is.numeric)]
+# Display dataset
+print(data)
 
-# Take number of clusters from user
-k <- as.integer(readline(prompt = "Enter number of clusters (k): "))
+# Apply K-Means Clustering
+# k = 2 clusters
+kmeans_result <- kmeans(data, centers = 2)
 
-# Take initial centers from user
-cat("Enter initial centers (row-wise):\n")
-
-centers <- matrix(nrow = k, ncol = ncol(data))
-
-for (i in 1:k) {
-  cat(paste("Center", i, ":\n"))
-  for (j in 1:ncol(data)) {
-    value <- as.numeric(readline(
-      prompt = paste("Enter value for", colnames(data)[j], ": ")
-    ))
-    centers[i, j] <- value
-  }
-}
-
-# Convert to data frame
-centers <- as.data.frame(centers)
-colnames(centers) <- colnames(data)
-
-# Apply K-Means with user-defined centers
-kmeans_result <- kmeans(data, centers = centers)
-
-# Output results
-cat("\nCluster Assignments:\n")
+# Cluster assignments
+print("Cluster Assignment")
 print(kmeans_result$cluster)
+
+# Cluster centers
+print("Cluster Centers")
+print(kmeans_result$centers)
+
+# -----------------------------
+# Visualization
+# -----------------------------
+
+# Plot clusters
+plot(data$x,
+     data$y,
+     col = kmeans_result$cluster,
+     pch = 19,
+     cex = 2,
+     xlab = "X",
+     ylab = "Y",
+     main = "K-Means Clustering")
+
+# Plot cluster centers
+points(kmeans_result$centers,
+       col = 1:2,
+       pch = 8,
+       cex = 4,
+       lwd = 3)
+
+# Add text labels
+# text(data$x,
+#      data$y,
+#      labels = kmeans_result$cluster,
+#      pos = 3)
+
+# Add legend
+legend("topleft",
+       legend = c("Cluster 1",
+                  "Cluster 2",
+                  "Centroids"),
+       col = c(1,2,"black"),
+       pch = c(19,19,8))
 
 cat("\nCluster Centers:\n")
 print(kmeans_result$centers)
